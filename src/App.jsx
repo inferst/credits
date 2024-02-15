@@ -1,6 +1,38 @@
+import { Show, createSignal } from 'solid-js';
+import { socket } from './socket/socket';
+import Credits from './components/Credits';
+import { createStore } from 'solid-js/store';
+
 function App() {
+  const [state, setState] = createStore({
+    followers: new Set(),
+    chatters: new Set(),
+  });
+
+  const [isStarted, setIsStarted] = createSignal(false);
+
+  socket({
+    onFollow: (followerName) => {
+      if (!isStarted()) {
+        setState('followers', (followers) => followers.add(followerName));
+      }
+    },
+    onChatMessage: (chatterName) => {
+      if (!isStarted()) {
+        setState('chatters', (chatters) => chatters.add(chatterName));
+      }
+    },
+    onStart: () => {
+      setIsStarted(true);
+    },
+  });
+
   return (
-    <p class="text-4xl text-green-700 text-center py-20">Hello Tailwind!</p>
+    <Show when={isStarted()}>
+      <Credits state={state} onComplete={() => {
+        setIsStarted(false);
+      }} />
+    </Show>
   );
 }
 

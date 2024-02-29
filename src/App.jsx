@@ -6,7 +6,7 @@ import { createStore } from 'solid-js/store';
 function App() {
   const [state, setState] = createStore({
     followers: new Set(),
-    chatters: new Set(),
+    chatters: {},
   });
 
   const [isStarted, setIsStarted] = createSignal(false);
@@ -19,7 +19,15 @@ function App() {
     },
     onChatMessage: (chatterName) => {
       if (!isStarted()) {
-        setState('chatters', (chatters) => chatters.add(chatterName));
+        setState('chatters', (chatters) => ({
+          ...chatters,
+          [chatterName]: {
+            ...chatters[chatterName],
+            messages: chatters[chatterName]?.messages
+              ? ++chatters[chatterName].messages
+              : 1,
+          },
+        }));
       }
     },
     onStart: () => {
@@ -29,9 +37,12 @@ function App() {
 
   return (
     <Show when={isStarted()}>
-      <Credits state={state} onComplete={() => {
-        setIsStarted(false);
-      }} />
+      <Credits
+        state={state}
+        onComplete={() => {
+          setIsStarted(false);
+        }}
+      />
     </Show>
   );
 }

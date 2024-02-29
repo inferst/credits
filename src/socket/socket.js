@@ -6,7 +6,7 @@ export const socket = (props) => {
       request: 'Subscribe',
       id: 'alerts',
       events: {
-        Twitch: ['Follow', 'FirstWord'],
+        Twitch: ['Follow', 'ChatMessage'],
         Raw: ['Action'],
       },
     };
@@ -17,10 +17,15 @@ export const socket = (props) => {
         const data = JSON.parse(event.data);
         if (data.event) {
           if (data.event.source == 'Twitch') {
-            if (data.event.type == 'Follow') {
-              props.onFollow(data.data.user_name);
-            } else if (data.event.type == 'FirstWord') {
-              props.onChatMessage(data.data.message.displayName);
+            switch (data.event.type) {
+              case 'Follow': {
+                props.onFollow(data.data.user_name);
+                break;
+              }
+              case 'ChatMessage': {
+                props.onChatMessage(data.data.message.displayName);
+                break;
+              }
             }
           } else if (data.event.source == 'Raw') {
             if (data.data.name == 'Switch to End Scene') {
